@@ -8,6 +8,12 @@ const gravatar = require('gravatar');
 // Import bcrypt to encrypt user password
 const bcrypt = require('bcryptjs');
 
+// Add JWT
+const jwt = require('jsonwebtoken');
+
+// Import Default.json config
+const config = require('config');
+
 // Import User Model
 const User = require('../../models/User');
 
@@ -38,7 +44,9 @@ router.post(
       let user = await User.findOne({ email });
 
       if (user) {
-        res.status(400).json({ errors: [{ msg: 'User already exists' }] });
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'User already exists' }] });
       }
 
       // Get users gravatar
@@ -67,7 +75,21 @@ router.post(
 
       // Return JWT
 
-      res.send('User created');
+      const payload = {
+        user: {
+          id: user.id,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        config.get('jwtSecret'),
+        { expiresIn: 360000 },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
