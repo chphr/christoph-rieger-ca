@@ -13,7 +13,7 @@ const PostSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  thumbnail: {
+  thumbnail_url: {
     type: String,
     required: true,
   },
