@@ -13,7 +13,7 @@ const PostSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  thumbnail: {
+  thumbnail_url: {
     type: String,
     required: true,
   },
@@ -32,8 +32,15 @@ const PostSchema = new mongoose.Schema({
   },
   lastUpdated: {
     type: Date,
+    default: new Date(),
+    required: false,
   },
   commentCount: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  likeCount: {
     type: Number,
     required: true,
     default: 0,
