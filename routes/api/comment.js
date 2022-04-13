@@ -21,13 +21,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   POST api/posts
-// @desc    Submit Blog Post
+// @route   POST api/comments
+// @desc    Submit Comment
 // @access  Public
 router.post(
   '/',
   [
-    check('postId', 'Comment needs like to Post').not().isEmpty(),
+    check('postId', 'Comment needs link to Post').not().isEmpty(),
     check('text', 'Text is required').not().isEmpty(),
   ],
   async (req, res) => {
