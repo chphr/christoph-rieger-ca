@@ -5,6 +5,9 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  parentId: {
+    type: String,
+  },
   text: {
     type: String,
     required: true,

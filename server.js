@@ -18,6 +18,7 @@ app.use('/api/auth', require('./routes/api/auth'));
 app.use('/api/resume', require('./routes/api/resume'));
 app.use('/api/posts', require('./routes/api/posts'));
 app.use('/api/profile', require('./routes/api/profile'));
+app.use('/api/comment', require('./routes/api/comment'));
 
 // Server Params
 const PORT = process.env.PORT || 8000;
