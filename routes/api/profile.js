@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
+const request = require('request');
+const config = require('config');
 
 // Import Models and Authentication
 const auth = require('../../middleware/auth');
@@ -124,6 +126,102 @@ router.delete('/', auth, async (req, res) => {
     // Remote User
     await User.findOneAndRemove({ _id: req.user.id });
     res.json({ msg: 'User deleted' });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// @route   GET api/profile/github/gists
+// @desc    Get user gists from Github
+// @access  Public
+router.get('/github/gists', async (req, res) => {
+  try {
+    const options = {
+      uri: `https://api.github.com/users/chphr/gists?sort=created: asc&client_id=${config.get(
+        'githubClient'
+      )}&client_secret=${config.get('githubSecret')}`,
+      method: 'GET',
+      headers: { 'user-agent': 'node.js' },
+    };
+
+    request(options, (error, response, body) => {
+      if (error) {
+        console.error(error.message);
+        res
+          .status(404)
+          .send({ msg: 'Errors sending the request to the Github API' });
+      }
+
+      if (response.statusCode != 200) {
+        res.status(500).send({ msg: 'Github profile not found' });
+      }
+      res.json(JSON.parse(body));
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// @route   GET api/profile/github/repos
+// @desc    Get user repositories from Github
+// @access  Public
+router.get('/github/repos', async (req, res) => {
+  try {
+    const options = {
+      uri: `https://api.github.com/users/chphr/repos?sort=created: asc&client_id=${config.get(
+        'githubClient'
+      )}&client_secret=${config.get('githubSecret')}`,
+      method: 'GET',
+      headers: { 'user-agent': 'node.js' },
+    };
+
+    request(options, (error, response, body) => {
+      if (error) {
+        console.error(error.message);
+        res
+          .status(404)
+          .send({ msg: 'Errors sending the request to the Github API' });
+      }
+
+      if (response.statusCode != 200) {
+        res.status(500).send({ msg: 'Github profile not found' });
+      }
+      res.json(JSON.parse(body));
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// @route   GET api/profile/github/user
+// @desc    Get user from Github
+// @access  Public
+router.get('/github/user', async (req, res) => {
+  try {
+    const options = {
+      uri: `https://api.github.com/users/chphr?&client_id=${config.get(
+        'githubClient'
+      )}&client_secret=${config.get('githubSecret')}`,
+      method: 'GET',
+      headers: { 'user-agent': 'node.js' },
+    };
+
+    request(options, (error, response, body) => {
+      if (error) {
+        console.error(error.message);
+        res
+          .status(404)
+          .send({ msg: 'Errors sending the request to the Github API' });
+      }
+
+      if (response.statusCode != 200) {
+        res.status(500).send({ msg: 'Github profile not found' });
+      }
+      res.json(JSON.parse(body));
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Internal Server Error');
