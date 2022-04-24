@@ -11,40 +11,41 @@ const User = require('../../models/User');
 const auth = require('../../middleware/auth');
 
 // @route   GET api/posts
-// @desc    GET Posts
+// @desc    GET all posts
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
-    console.error(err.message);
+    console.error(error.message);
     res.status(500).json({ msg: 'Internal Server Error' });
   }
 });
 
 // @route   GET api/posts/:post_id
-// @desc    GET single Post
+// @desc    GET single post by ID
 // @access  Public
 router.get('/:post_id', async (req, res) => {
   try {
-    const post = await Post.findOne({
-      _id: req.params.post_id,
-    });
+    const post = await Post.findById(req.params.post_id);
 
     if (!post) {
-      return res.status(400).json({ errors: [{ msg: "Post doesn't exist" }] });
+      return res.status(404).json({ errors: [{ msg: 'Post not found' }] });
     }
 
     res.json(post);
   } catch (error) {
-    console.error(err.message);
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ errors: [{ msg: 'Post not found' }] });
+    }
     res.status(500).json({ msg: 'Internal Server Error' });
   }
 });
 
 // @route   POST api/posts
-// @desc    Submit Blog Post
+// @desc    Submit blog post
 // @access  Private
 router.post(
   '/',
@@ -60,7 +61,6 @@ router.post(
     ],
   ],
   async (req, res) => {
-    // console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -99,7 +99,7 @@ router.post(
         slug,
       });
 
-      // Create Post in Database
+      // Create post in database
       await post.save();
 
       res.json({ post });
@@ -110,8 +110,8 @@ router.post(
   }
 );
 
-// @route   DELETE api/posts
-// @desc    Delete Post
+// @route   DELETE api/posts/:post_id
+// @desc    Delete post
 // @access  Private
 router.delete('/:post_id', auth, async (req, res) => {
   try {
@@ -121,10 +121,34 @@ router.delete('/:post_id', auth, async (req, res) => {
       await Post.findOneAndRemove({ _id: req.params.post_id });
       res.json({ msg: 'Post deleted' });
     } else {
-      res.status(500).send('Insufficient Permissions');
+      res.status(401).send('User not authorized');
     }
   } catch (error) {
     console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ errors: [{ msg: 'Post not found' }] });
+    }
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// @route   PUT api/posts/like/:post_id
+// @desc    Add like to post
+// @access  Public
+router.put('/like/:post_id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.post_id);
+
+    post.likeCount = post.likeCount + 1;
+
+    await post.save();
+
+    res.json(post.likeCount);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ errors: [{ msg: 'Post not found' }] });
+    }
     res.status(500).send('Internal Server Error');
   }
 });
