@@ -23,6 +23,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @route   GET api/posts/:post_id
+// @desc    GET single Post
+// @access  Public
+router.get('/:post_id', async (req, res) => {
+  try {
+    const post = await Post.findOne({
+      _id: req.params.post_id,
+    });
+
+    if (!post) {
+      return res.status(400).json({ errors: [{ msg: "Post doesn't exist" }] });
+    }
+
+    res.json(post);
+  } catch (error) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
+  }
+});
+
 // @route   POST api/posts
 // @desc    Submit Blog Post
 // @access  Private
@@ -48,6 +68,7 @@ router.post(
 
     const { title, description, markdown, thumbnail_url, categories, slug } =
       req.body;
+    const author = req.user.id;
 
     try {
       // Check Permissions
@@ -69,6 +90,7 @@ router.post(
       }
 
       post = new Post({
+        author,
         title,
         description,
         markdown,

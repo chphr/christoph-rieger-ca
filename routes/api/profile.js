@@ -212,13 +212,13 @@ router.get('/github/user', async (req, res) => {
     request(options, (error, response, body) => {
       if (error) {
         console.error(error.message);
-        res
+        return res
           .status(404)
           .send({ msg: 'Errors sending the request to the Github API' });
       }
 
       if (response.statusCode != 200) {
-        res.status(500).send({ msg: 'Github profile not found' });
+        return res.status(500).send({ msg: 'Github profile not found' });
       }
       res.json(JSON.parse(body));
     });
